@@ -72,6 +72,31 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Event not found
+    delete:
+      tags:
+        - event
+      summary: Delete an existing event
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: eventId
+          in: path
+          description: ID of event to return
+          required: true
+          type: integer
+          format: int64
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: Event successfully deleted
+          schema:
+            $ref: '#/definitions/EventNew'
+        "400":
+          description: Bad Request
+        "404":
+          description: Event not found
   /event:
     post:
       tags:
