@@ -1,0 +1,232 @@
+swagger: '2.0'
+info:
+  description: |
+    This is a sample Petstore server.  You can find 
+    out more about Swagger at 
+    [http://swagger.io](http://swagger.io) or on 
+    [irc.freenode.net, #swagger](http://swagger.io/irc/).
+  version: 1.0.0
+  title: BEXEventsAndroid
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+# host: petstore.swagger.io
+# basePath: /v2
+tags:
+  - name: events
+    description: Everything about your Pets
+    externalDocs:
+      description: Find out more
+      url: http://swagger.io
+# schemes:
+# - http
+paths:
+  /events:
+    get:
+      tags:
+        - events
+      summary: Returns all events
+      description: All the events are desplayed
+      produces:
+        - application/json
+        - application/xml
+      responses:
+        200:
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Event'
+        400:
+          description: Invalid status value
+      security:
+        - api_key: []
+  /events/{eventId}:
+    get:
+      tags:
+        - event
+      summary: Find event by ID
+      description: Returns a single event
+      operationId: getEventById
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - name: eventId
+          in: path
+          description: ID of event to return
+          required: true
+          type: integer
+          format: int64
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/EventById'
+        400:
+          description: Invalid ID supplied
+        404:
+          description: Event not found
+      security:
+        - api_key: []
+securityDefinitions:
+  petstore_auth:
+    type: oauth2
+    authorizationUrl: http://petstore.swagger.io/oauth/dialog
+    flow: implicit
+    scopes:
+      write:pets: modify pets in your account
+      read:pets: read your pets
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header
+definitions:
+  EventById:
+    type: object
+    required:
+      - id
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+        example: DevTalks2022
+      startDateTime:
+        type: string
+        example: 04-11-2019 14:00
+      endDateTime:
+        type: string
+        example: 04-11-2019 17:00
+      duration:
+        type: string
+        example: 1 week 2 days 3 hours
+      location:
+        type: string
+        example: DB connect
+      description:
+        type: string
+        example: teambuilding event for new DB employees
+      organiser:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int64
+          firstName:
+            type: string
+          lastName:
+            type: string
+          email:
+            type: string
+        example:
+          id: 11
+          firstName: John
+          lastName: Doe
+          email: johndoe@gmail.com
+      attendees:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            firstName:
+              type: string
+            lastName:
+              type: string
+            email:
+              type: string
+        example:
+          - id: 11
+            firstName: John
+            lastName: Doe
+            email: johndoe@gmail.com
+          - id: 23
+            firstName: Jonas
+            lastName: Kahnwald
+            email: jonaskahnwald@yahoo.com
+          - id: 30
+            firstName: Saul
+            lastName: Goodman
+            email: saulgoodman@db.com
+      isAttendingEvent:
+        type: boolean
+        example: false
+    xml:
+      name: EventById
+  Event:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      name:
+        type: string
+      startDateTime:
+        type: string
+      endDateTime:
+        type: string
+      duration:
+        type: string
+      location:
+        type: string
+    example:
+      - id: 11
+        name: DevTalks2021
+        startDateTime: 03-11-2019 14:00
+        endDateTime: 03-11-2019 17:00
+        duration: 1 week 1 days 2 hours
+        location: DB waterfall
+      - id: 23
+        name: PartyNight
+        startDateTime: 04-11-2019 14:00
+        endDateTime: 04-11-2019 17:00
+        duration: 3 hours
+        location: DB ballroom
+      - id: 15
+        name: Well-being Workshop
+        startDateTime: 07-11-2019 14:00
+        endDateTime: 08-11-2019 17:00
+        duration: 2 days 1 hours
+        location: DB connect
+    xml:
+      name: Event
+  User:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+  ApiResponse:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      type:
+        type: string
+      message:
+        type: string
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+# Added by API Auto Mocking Plugin
+host: virtserver.swaggerhub.com
+# basePath: /SavuAdrianMihai/BEXEventsAndroid/1.0.0
+schemes:
+  - https
+  - http
+# Added by API Auto Mocking Plugin
+basePath: /BEXEventsAndroid/BEXEventsAndroid/1.0.0
