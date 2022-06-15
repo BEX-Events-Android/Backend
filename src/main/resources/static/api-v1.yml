@@ -1,10 +1,8 @@
-swagger: '2.0'
+---
+swagger: "2.0"
 info:
   description: |
-    This is a sample Petstore server.  You can find 
-    out more about Swagger at 
-    [http://swagger.io](http://swagger.io) or on 
-    [irc.freenode.net, #swagger](http://swagger.io/irc/).
+    This is the backend server.
   version: 1.0.0
   title: BEXEventsAndroid
   termsOfService: http://swagger.io/terms/
@@ -13,16 +11,17 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-# host: petstore.swagger.io
-# basePath: /v2
+host: virtserver.swaggerhub.com
+basePath: /BEXEventsAndroid/BEXEventsAndroid/1.0.0
 tags:
   - name: events
-    description: Everything about your Pets
+    description: Everything about each event
     externalDocs:
       description: Find out more
       url: http://swagger.io
-# schemes:
-# - http
+schemes:
+  - https
+  - http
 paths:
   /events:
     get:
@@ -33,17 +32,18 @@ paths:
       produces:
         - application/json
         - application/xml
+      parameters: []
+      security:
+        - api_key: []
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             type: array
             items:
               $ref: '#/definitions/Event'
-        400:
+        "400":
           description: Invalid status value
-      security:
-        - api_key: []
   /events/{eventId}:
     get:
       tags:
@@ -61,17 +61,38 @@ paths:
           required: true
           type: integer
           format: int64
+      security:
+        - api_key: []
       responses:
-        200:
+        "200":
           description: successful operation
           schema:
             $ref: '#/definitions/EventById'
-        400:
+        "400":
           description: Invalid ID supplied
-        404:
+        "404":
           description: Event not found
+  /event:
+    post:
+      tags:
+        - event
+      summary: Create a new event
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - in: body
+          name: Event
+          required: false
+          schema:
+            $ref: '#/definitions/EventNew'
       security:
         - api_key: []
+      responses:
+        "200":
+          description: successful operation
+        "400":
+          description: bad request
 securityDefinitions:
   petstore_auth:
     type: oauth2
@@ -112,36 +133,9 @@ definitions:
         type: string
         example: teambuilding event for new DB employees
       organiser:
-        type: object
-        properties:
-          id:
-            type: integer
-            format: int64
-          firstName:
-            type: string
-          lastName:
-            type: string
-          email:
-            type: string
-        example:
-          id: 11
-          firstName: John
-          lastName: Doe
-          email: johndoe@gmail.com
+        $ref: '#/definitions/EventById_organiser'
       attendees:
         type: array
-        items:
-          type: object
-          properties:
-            id:
-              type: integer
-              format: int64
-            firstName:
-              type: string
-            lastName:
-              type: string
-            email:
-              type: string
         example:
           - id: 11
             firstName: John
@@ -155,6 +149,8 @@ definitions:
             firstName: Saul
             lastName: Goodman
             email: saulgoodman@db.com
+        items:
+          $ref: '#/definitions/EventById_attendees'
       isAttendingEvent:
         type: boolean
         example: false
@@ -176,6 +172,8 @@ definitions:
         type: string
       location:
         type: string
+    xml:
+      name: Event
     example:
       - id: 11
         name: DevTalks2021
@@ -195,8 +193,6 @@ definitions:
         endDateTime: 08-11-2019 17:00
         duration: 2 days 1 hours
         location: DB connect
-    xml:
-      name: Event
   User:
     type: object
     properties:
@@ -219,14 +215,54 @@ definitions:
         type: string
       message:
         type: string
+  EventNew:
+    type: object
+    properties:
+      name:
+        type: string
+        example: Java Training
+      startDateTime:
+        type: string
+        example: 15-06-22 09:00
+      endateTime:
+        type: string
+        example: 30-06-22 15:00
+      duration:
+        type: string
+        example: 2 weeks 1 day 6 hours
+      location:
+        type: string
+        example: remote
+      description:
+        type: string
+        example: sample text
+      organiser:
+        $ref: '#/definitions/User'
+  EventById_organiser:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
+    example: '{"id":11,"firstName":"John","lastName":"Doe","email":"johndoe@gmail.com"}'
+  EventById_attendees:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      firstName:
+        type: string
+      lastName:
+        type: string
+      email:
+        type: string
 externalDocs:
   description: Find out more about Swagger
   url: http://swagger.io
-# Added by API Auto Mocking Plugin
-host: virtserver.swaggerhub.com
-# basePath: /SavuAdrianMihai/BEXEventsAndroid/1.0.0
-schemes:
-  - https
-  - http
-# Added by API Auto Mocking Plugin
-basePath: /BEXEventsAndroid/BEXEventsAndroid/1.0.0
