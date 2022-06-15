@@ -34,4 +34,11 @@ public class EventController {
         return new ResponseEntity<>(event, HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/events/{id}")
+    public ResponseEntity<String> deleteEvent(@PathVariable("id") int id) {
+        Event event = eventRepository.findById(id);
+        eventRepository.delete(event);
+        return new ResponseEntity<>("Successfully deleted", HttpStatus.OK);
+    }
+
 }
