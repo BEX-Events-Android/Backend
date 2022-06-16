@@ -28,7 +28,7 @@ public class Event {
     @Column(name = "endDateTime")
     private String endDateTime;
 
-    @Column(name = "duration")
+    // TO DO: calculate duration based on start/end date
     private String duration;
 
     @Column(name = "location")

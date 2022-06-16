@@ -30,8 +30,12 @@ public class EventController {
 
     @PostMapping("/events")
     public ResponseEntity<Event> addEvent(@RequestBody Event event) {
-        eventRepository.save(event);
-        return new ResponseEntity<>(event, HttpStatus.CREATED);
+        // TO DO: create new event request DTO that contains what's documented in event API
+        // TO DO: validate event request DTO for mandatory data
+        // TO DO: calculate duration from start/end date
+        // TO DO: add check for organiser's email
+        Event savedEvent = eventRepository.save(event);
+        return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/events/{id}")
