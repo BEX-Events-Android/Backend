@@ -2,6 +2,7 @@ package com.db.cloud.school.bexevents.controllers;
 
 import com.db.cloud.school.bexevents.exceptions.EventNotFoundException;
 import com.db.cloud.school.bexevents.models.Event;
+import com.db.cloud.school.bexevents.models.Image;
 import com.db.cloud.school.bexevents.models.NewEventRequest;
 import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.repositories.EventRepository;
@@ -47,7 +48,6 @@ public class EventController {
         eventService.checkMandatoryData(event);
         String duration = eventService.getDuration(event.getStartDateTime(), event.getEndDateTime());
         User organiser = userRepository.findByEmail(event.getOrganiserEmail()).get();
-
         Event savedEvent = new Event(event, organiser, duration);
         eventRepository.save(savedEvent);
         return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);

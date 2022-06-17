@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -50,6 +51,12 @@ public class Event {
     @Column(name = "attendees")
     private List<User> attendees;
 
+    // an event can contain multiple images
+    @OneToMany
+    @Cascade({org.hibernate.annotations.CascadeType.ALL})
+    @Column(name = "images")
+    private List<Image> images;
+
     @Column(name = "isAttendingEvent")
     private boolean isAttendingEvent;
 
@@ -59,6 +66,7 @@ public class Event {
         endDateTime = newEventRequest.getEndDateTime();
         location = newEventRequest.getLocation();
         description = newEventRequest.getDescription();
+        images = newEventRequest.getImages();
         this.duration = duration;
         this.organiser = organiser;
         attendees = new ArrayList<>();
