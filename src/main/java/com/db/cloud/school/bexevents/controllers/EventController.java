@@ -1,6 +1,7 @@
 package com.db.cloud.school.bexevents.controllers;
 
 import com.db.cloud.school.bexevents.models.Event;
+import com.db.cloud.school.bexevents.models.NewEventRequest;
 import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.repositories.EventRepository;
 import com.db.cloud.school.bexevents.repositories.UserRepository;

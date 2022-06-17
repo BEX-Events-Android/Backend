@@ -1,6 +1,6 @@
 package com.db.cloud.school.bexevents.services;
 
-import com.db.cloud.school.bexevents.controllers.NewEventRequest;
+import com.db.cloud.school.bexevents.models.NewEventRequest;
 import com.db.cloud.school.bexevents.exceptions.EmailNotFoundException;
 import com.db.cloud.school.bexevents.exceptions.InvalidEventDataException;
 import com.db.cloud.school.bexevents.models.User;

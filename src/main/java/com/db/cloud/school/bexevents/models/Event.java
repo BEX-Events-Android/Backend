@@ -1,6 +1,5 @@
 package com.db.cloud.school.bexevents.models;
 
-import com.db.cloud.school.bexevents.controllers.NewEventRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

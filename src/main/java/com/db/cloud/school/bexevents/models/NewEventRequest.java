@@ -1,4 +1,4 @@
-package com.db.cloud.school.bexevents.controllers;
+package com.db.cloud.school.bexevents.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
