@@ -1,7 +1,10 @@
 package com.db.cloud.school.bexevents.controllers;
 
 import com.db.cloud.school.bexevents.models.Event;
+import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.repositories.EventRepository;
+import com.db.cloud.school.bexevents.repositories.UserRepository;
+import com.db.cloud.school.bexevents.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,12 @@ public class EventController {
     @Autowired
     EventRepository eventRepository;
 
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    EventService eventService;
+
     @GetMapping("/events/{id}")
     public ResponseEntity<Event> getEvent(@PathVariable("id") int id) {
         Event event = eventRepository.findById(id);
@@ -29,12 +38,13 @@ public class EventController {
     }
 
     @PostMapping("/events")
-    public ResponseEntity<Event> addEvent(@RequestBody Event event) {
-        // TO DO: create new event request DTO that contains what's documented in event API
-        // TO DO: validate event request DTO for mandatory data
-        // TO DO: calculate duration from start/end date
-        // TO DO: add check for organiser's email
-        Event savedEvent = eventRepository.save(event);
+    public ResponseEntity<Event> addEvent(@RequestBody NewEventRequest event) {
+        eventService.checkMandatoryData(event);
+        String duration = eventService.getDuration(event.getStartDateTime(), event.getEndDateTime());
+        User organiser = userRepository.findByEmail(event.getOrganiserEmail()).get();
+
+        Event savedEvent = new Event(event, organiser, duration);
+        eventRepository.save(savedEvent);
         return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
     }
 

@@ -1,11 +1,13 @@
 package com.db.cloud.school.bexevents.models;
 
+import com.db.cloud.school.bexevents.controllers.NewEventRequest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -51,4 +53,16 @@ public class Event {
 
     @Column(name = "isAttendingEvent")
     private boolean isAttendingEvent;
+
+    public Event(NewEventRequest newEventRequest, User organiser, String duration) {
+        name = newEventRequest.getName();
+        startDateTime = newEventRequest.getStartDateTime();
+        endDateTime = newEventRequest.getEndDateTime();
+        location = newEventRequest.getLocation();
+        description = newEventRequest.getDescription();
+        this.duration = duration;
+        this.organiser = organiser;
+        attendees = new ArrayList<>();
+        isAttendingEvent = false;
+    }
 }
