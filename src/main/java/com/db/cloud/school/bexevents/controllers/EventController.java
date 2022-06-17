@@ -1,5 +1,6 @@
 package com.db.cloud.school.bexevents.controllers;
 
+import com.db.cloud.school.bexevents.exceptions.EventNotFoundException;
 import com.db.cloud.school.bexevents.models.Event;
 import com.db.cloud.school.bexevents.models.NewEventRequest;
 import com.db.cloud.school.bexevents.models.User;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class EventController {
@@ -28,8 +30,10 @@ public class EventController {
 
     @GetMapping("/events/{id}")
     public ResponseEntity<Event> getEvent(@PathVariable("id") int id) {
-        Event event = eventRepository.findById(id);
-        return new ResponseEntity<>(event, HttpStatus.OK);
+        Optional<Event> eventOptional = eventRepository.findById(id);
+        if (eventOptional.isEmpty())
+            throw new EventNotFoundException("Event not found!");
+        return new ResponseEntity<>(eventOptional.get(), HttpStatus.OK);
     }
 
     @GetMapping("/events")
@@ -51,8 +55,10 @@ public class EventController {
 
     @DeleteMapping("/events/{id}")
     public ResponseEntity<String> deleteEvent(@PathVariable("id") int id) {
-        Event event = eventRepository.findById(id);
-        eventRepository.delete(event);
+        Optional<Event> eventOptional = eventRepository.findById(id);
+        if (eventOptional.isEmpty())
+            throw new EventNotFoundException("Event not found!");
+        eventRepository.delete(eventOptional.get());
         return new ResponseEntity<>("Successfully deleted", HttpStatus.OK);
     }
 
