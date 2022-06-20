@@ -12,8 +12,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "images")
-public class Image {
+@Table(name = "assets")
+public class Asset {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;

@@ -54,8 +54,8 @@ public class Event {
     // an event can contain multiple images
     @OneToMany
     @Cascade({org.hibernate.annotations.CascadeType.ALL})
-    @Column(name = "images")
-    private List<Image> images;
+    @Column(name = "assets")
+    private List<Asset> assets;
 
     @Column(name = "isAttendingEvent")
     private boolean isAttendingEvent;
@@ -66,7 +66,7 @@ public class Event {
         endDateTime = newEventRequest.getEndDateTime();
         location = newEventRequest.getLocation();
         description = newEventRequest.getDescription();
-        images = newEventRequest.getImages();
+        assets = newEventRequest.getAssets();
         this.duration = duration;
         this.organiser = organiser;
         attendees = new ArrayList<>();

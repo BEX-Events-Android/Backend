@@ -17,6 +17,6 @@ public class NewEventRequest {
     private String endDateTime;
     private String location;
     private String description;
-    private List<Image> images;
+    private List<Asset> assets;
     private String organiserEmail;
 }

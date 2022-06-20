@@ -2,7 +2,6 @@ package com.db.cloud.school.bexevents.controllers;
 
 import com.db.cloud.school.bexevents.exceptions.EventNotFoundException;
 import com.db.cloud.school.bexevents.models.Event;
-import com.db.cloud.school.bexevents.models.Image;
 import com.db.cloud.school.bexevents.models.NewEventRequest;
 import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.repositories.EventRepository;
