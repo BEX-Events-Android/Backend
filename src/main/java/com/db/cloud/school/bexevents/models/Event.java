@@ -7,8 +7,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "events")
@@ -57,8 +56,9 @@ public class Event {
     @Column(name = "assets")
     private List<Asset> assets;
 
+    @ManyToMany
     @Column(name = "isAttendingEvent")
-    private boolean isAttendingEvent;
+    private Set<User> isAttendingEvent;
 
     public Event(NewEventRequest newEventRequest, User organiser, String duration) {
         name = newEventRequest.getName();
@@ -70,6 +70,6 @@ public class Event {
         this.duration = duration;
         this.organiser = organiser;
         attendees = new ArrayList<>();
-        isAttendingEvent = false;
+        isAttendingEvent = new HashSet<>();
     }
 }
