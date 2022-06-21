@@ -29,4 +29,11 @@ public class User {
 
     @Column(name = "password")
     private String password;
+
+    public User(String firstName, String lastName, String email, String encodedPassword) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = encodedPassword;
+    }
 }

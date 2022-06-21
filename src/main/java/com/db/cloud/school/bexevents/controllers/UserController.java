@@ -3,6 +3,7 @@ package com.db.cloud.school.bexevents.controllers;
 import com.db.cloud.school.bexevents.models.LoginRequest;
 import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.models.UserInfoResponse;
+import com.db.cloud.school.bexevents.payload.UserSignupRequest;
 import com.db.cloud.school.bexevents.repositories.UserRepository;
 import com.db.cloud.school.bexevents.security.jwt.JwtUtils;
 import com.db.cloud.school.bexevents.security.services.UserDetailsImpl;
@@ -74,8 +75,20 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> registerUser(@RequestBody User user) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserSignupRequest signUpRequest) {
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+        }
+
+        // Create new user's account
+        User user = new User(signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
+                signUpRequest.getEmail(),
+                encoder.encode(signUpRequest.getPassword()));
+
         userRepository.save(user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+
+        return ResponseEntity.ok("User registered successfully!");
     }
 }
