@@ -56,7 +56,7 @@ public class Event {
     @Column(name = "assets")
     private List<Asset> assets;
 
-    @ManyToMany
+    @ManyToMany(mappedBy = "attendsEvent")
     @Column(name = "isAttendingEvent")
     private Set<User> isAttendingEvent;
 
