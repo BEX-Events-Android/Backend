@@ -12,4 +12,11 @@ public class UserInfoResponse {
     private String firstName;
     private String lastName;
     private String email;
+
+    public UserInfoResponse(User user) {
+        id = user.getId();
+        firstName = user.getFirstName();
+        lastName = user.getLastName();
+        email = user.getEmail();
+    }
 }

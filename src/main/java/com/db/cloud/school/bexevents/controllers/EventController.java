@@ -2,6 +2,7 @@ package com.db.cloud.school.bexevents.controllers;
 
 import com.db.cloud.school.bexevents.exceptions.EventNotFoundException;
 import com.db.cloud.school.bexevents.models.Event;
+import com.db.cloud.school.bexevents.models.EventResponse;
 import com.db.cloud.school.bexevents.models.NewEventRequest;
 import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.repositories.EventRepository;
@@ -29,17 +30,23 @@ public class EventController {
     EventService eventService;
 
     @GetMapping("/events/{id}")
-    public ResponseEntity<Event> getEvent(@PathVariable("id") int id) {
+    public ResponseEntity<EventResponse> getEvent(@PathVariable("id") int id) {
         Optional<Event> eventOptional = eventRepository.findById(id);
         if (eventOptional.isEmpty())
             throw new EventNotFoundException("Event not found!");
-        return new ResponseEntity<>(eventOptional.get(), HttpStatus.OK);
+        Event event = eventOptional.get();
+        EventResponse eventResponse = new EventResponse(event);
+        return new ResponseEntity<>(eventResponse, HttpStatus.OK);
     }
 
     @GetMapping("/events")
-    public ResponseEntity<List<Event>> getAllEvents() {
+    public ResponseEntity<List<EventResponse>> getAllEvents() {
         List<Event> events = new ArrayList<>(eventRepository.findAll());
-        return new ResponseEntity<>(events, HttpStatus.OK);
+        List<EventResponse> eventResponses = new ArrayList<>();
+        for (Event event : events) {
+            eventResponses.add(new EventResponse(event));
+        }
+        return new ResponseEntity<>(eventResponses, HttpStatus.OK);
     }
 
     @PostMapping("/events")
