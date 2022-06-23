@@ -49,7 +49,7 @@ public class EventController {
         User organiser = userRepository.findByEmail(event.getOrganiserEmail()).get();
         Event savedEvent = new Event(event, organiser, duration);
         eventRepository.save(savedEvent);
-        return new ResponseEntity<>(savedEvent, HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @DeleteMapping("/events/{id}")
