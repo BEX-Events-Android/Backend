@@ -16,6 +16,7 @@ public class EventResponse {
     private String startDateTime;
     private String endDateTime;
     private String duration;
+    private String location;
     private String description;
     private UserInfoResponse organiser;
     private List<UserInfoResponse> attendees;
@@ -30,6 +31,7 @@ public class EventResponse {
         description = event.getDescription();
         organiser = new UserInfoResponse(event.getOrganiser());
         attendees = new ArrayList<>();
+        location = event.getLocation();
         for (User attendee : event.getAttendees()) {
             attendees.add(new UserInfoResponse(attendee));
         }
