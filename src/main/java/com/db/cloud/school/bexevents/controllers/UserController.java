@@ -20,8 +20,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +56,7 @@ public class UserController {
 
         ResponseCookie jwtCookie = jwtUtils.generateJwtCookie(userDetails);
 
-        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+        return ResponseEntity.ok().header(HttpHeaders.COOKIE, jwtCookie.toString())
                 .body(new UserInfoResponse(userDetails.getId(),
                         userDetails.getFirstName(),
                         userDetails.getLastName(),
@@ -90,5 +93,14 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok("User registered successfully!");
+    }
+
+    @GetMapping("/test")
+    public String homePage(HttpServletRequest httpServletRequest) {
+        String token = jwtUtils.getJwtFromCookies(httpServletRequest);
+        System.out.println(token);
+        jwtUtils.validateJwtToken(token);
+        System.out.println(jwtUtils.getEmailFromJwtToken(token));
+        return null;
     }
 }
