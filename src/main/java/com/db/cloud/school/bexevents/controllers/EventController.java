@@ -7,12 +7,14 @@ import com.db.cloud.school.bexevents.models.NewEventRequest;
 import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.repositories.EventRepository;
 import com.db.cloud.school.bexevents.repositories.UserRepository;
+import com.db.cloud.school.bexevents.security.jwt.JwtUtils;
 import com.db.cloud.school.bexevents.services.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,22 +31,29 @@ public class EventController {
     @Autowired
     EventService eventService;
 
+    @Autowired
+    JwtUtils jwtUtils;
+
+
     @GetMapping("/events/{id}")
-    public ResponseEntity<EventResponse> getEvent(@PathVariable("id") int id) {
+    public ResponseEntity<EventResponse> getEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
         Optional<Event> eventOptional = eventRepository.findById(id);
         if (eventOptional.isEmpty())
             throw new EventNotFoundException("Event not found!");
         Event event = eventOptional.get();
-        EventResponse eventResponse = new EventResponse(event);
+        boolean isAttending = eventService.checkIfUserAttends(id, httpServletRequest);
+        EventResponse eventResponse = new EventResponse(event, isAttending);
         return new ResponseEntity<>(eventResponse, HttpStatus.OK);
     }
 
     @GetMapping("/events")
-    public ResponseEntity<List<EventResponse>> getAllEvents() {
+    public ResponseEntity<List<EventResponse>> getAllEvents(HttpServletRequest httpServletRequest) {
         List<Event> events = new ArrayList<>(eventRepository.findAll());
         List<EventResponse> eventResponses = new ArrayList<>();
+        boolean isAttending;
         for (Event event : events) {
-            eventResponses.add(new EventResponse(event));
+            isAttending = eventService.checkIfUserAttends(event.getId(), httpServletRequest);
+            eventResponses.add(new EventResponse(event, isAttending));
         }
         return new ResponseEntity<>(eventResponses, HttpStatus.OK);
     }
@@ -68,4 +77,17 @@ public class EventController {
         return new ResponseEntity<>("Successfully deleted", HttpStatus.OK);
     }
 
+    @PostMapping("/events/{id}/booking")
+    public ResponseEntity<String> bookEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
+        String token = jwtUtils.getJwtFromCookies(httpServletRequest);
+        jwtUtils.validateJwtToken(token);
+        String email = jwtUtils.getEmailFromJwtToken(token);
+        Optional<User> user = userRepository.findByEmail(email);
+        Optional<Event> event = eventRepository.findById(id);
+        event.get().getAttendees().add(user.get());
+        user.get().getAttendsEvent().add(event.get());
+        userRepository.save(user.get());
+        eventRepository.save(event.get());
+        return new ResponseEntity<String>("The booking was a success", HttpStatus.OK);
+    }
 }

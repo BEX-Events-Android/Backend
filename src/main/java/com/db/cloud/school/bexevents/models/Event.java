@@ -46,7 +46,8 @@ public class Event {
 
     // an event can host multiple users
     // thus a oneToMany relation has been chosen
-    @OneToMany
+    @ManyToMany(mappedBy = "attendsEvent")
+    @Cascade({org.hibernate.annotations.CascadeType.ALL})
     @Column(name = "attendees")
     private List<User> attendees;
 
@@ -55,10 +56,6 @@ public class Event {
     @Cascade({org.hibernate.annotations.CascadeType.ALL})
     @Column(name = "assets")
     private List<Asset> assets;
-
-    @ManyToMany(mappedBy = "attendsEvent")
-    @Column(name = "isAttendingEvent")
-    private Set<User> isAttendingEvent;
 
     public Event(NewEventRequest newEventRequest, User organiser, String duration) {
         name = newEventRequest.getName();
@@ -70,6 +67,5 @@ public class Event {
         this.duration = duration;
         this.organiser = organiser;
         attendees = new ArrayList<>();
-        isAttendingEvent = new HashSet<>();
     }
 }

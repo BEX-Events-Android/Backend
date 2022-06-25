@@ -25,4 +25,10 @@ public class GlobalExceptionHandler {
     public @ResponseBody ErrorResponse handleEventNotFoundException(EventNotFoundException ex) {
         return new ErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
     }
+
+    @ExceptionHandler(value = NotLoggedInExcpetion.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public @ResponseBody ErrorResponse handleNotLoggedInExcpetion(NotLoggedInExcpetion ex) {
+        return new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+    }
 }

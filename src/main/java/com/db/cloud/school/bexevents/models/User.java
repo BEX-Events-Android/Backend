@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -32,11 +34,12 @@ public class User {
     private String password;
 
     @ManyToMany
+    @Cascade({org.hibernate.annotations.CascadeType.ALL})
     @JoinTable(
-            name = "event_attend",
+            name = "events_attendees",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "event_id"))
-    Set<Event> attendsEvent;
+    List<Event> attendsEvent;
 
     public User(String firstName, String lastName, String email, String encodedPassword) {
         this.firstName = firstName;

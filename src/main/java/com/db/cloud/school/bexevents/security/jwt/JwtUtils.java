@@ -1,5 +1,6 @@
 package com.db.cloud.school.bexevents.security.jwt;
 
+import com.db.cloud.school.bexevents.exceptions.NotLoggedInExcpetion;
 import com.db.cloud.school.bexevents.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import org.slf4j.Logger;
@@ -31,7 +32,8 @@ public class JwtUtils {
         if (cookie != null) {
             return cookie.getValue();
         } else {
-            return null;
+//            return null;
+            throw new NotLoggedInExcpetion("You must be logged in!");
         }
     }
 

@@ -1,14 +1,17 @@
 package com.db.cloud.school.bexevents.services;
 
+import com.db.cloud.school.bexevents.models.Event;
 import com.db.cloud.school.bexevents.models.NewEventRequest;
 import com.db.cloud.school.bexevents.exceptions.EmailNotFoundException;
 import com.db.cloud.school.bexevents.exceptions.InvalidEventDataException;
 import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.repositories.EventRepository;
 import com.db.cloud.school.bexevents.repositories.UserRepository;
+import com.db.cloud.school.bexevents.security.jwt.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -23,6 +26,9 @@ public class EventService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    JwtUtils jwtUtils;
 
     private void checkEmail(String email) {
         Optional<User> userOptional = userRepository.findByEmail(email);
@@ -131,5 +137,19 @@ public class EventService {
         checkEmail(event.getOrganiserEmail());
         checkDateFormat(event.getStartDateTime());
         checkDateFormat(event.getEndDateTime());
+    }
+
+    public boolean checkIfUserAttends(int id, HttpServletRequest httpServletRequest) {
+        String token = jwtUtils.getJwtFromCookies(httpServletRequest);
+        jwtUtils.validateJwtToken(token);
+        String email = jwtUtils.getEmailFromJwtToken(token);
+        Optional<User> user = userRepository.findByEmail(email);
+        Optional<Event> event = eventRepository.findById(id);
+        for (User u : event.get().getAttendees()) {
+            if (user.get().getEmail().equals(u.getEmail())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

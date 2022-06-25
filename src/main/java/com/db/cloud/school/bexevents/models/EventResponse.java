@@ -22,7 +22,7 @@ public class EventResponse {
     private List<UserInfoResponse> attendees;
     private boolean isAttendingEvent;
 
-    public EventResponse(Event event) {
+    public EventResponse(Event event, boolean attends) {
         id = event.getId();
         name = event.getName();
         startDateTime = event.getStartDateTime();
@@ -35,6 +35,6 @@ public class EventResponse {
         for (User attendee : event.getAttendees()) {
             attendees.add(new UserInfoResponse(attendee));
         }
-        isAttendingEvent = false; // TODO implement logic by jwt
+        isAttendingEvent = attends; // TODO implement logic by jwt
     }
 }
