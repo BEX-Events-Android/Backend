@@ -1,6 +1,8 @@
 package com.db.cloud.school.bexevents.controllers;
 
+import com.db.cloud.school.bexevents.exceptions.EmailNotFoundException;
 import com.db.cloud.school.bexevents.exceptions.EventNotFoundException;
+import com.db.cloud.school.bexevents.exceptions.UnauthorizedException;
 import com.db.cloud.school.bexevents.models.Event;
 import com.db.cloud.school.bexevents.models.EventResponse;
 import com.db.cloud.school.bexevents.models.NewEventRequest;
@@ -69,11 +71,23 @@ public class EventController {
     }
 
     @DeleteMapping("/events/{id}")
-    public ResponseEntity<String> deleteEvent(@PathVariable("id") int id) {
+    public ResponseEntity<String> deleteEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
+        String token = jwtUtils.getJwtFromCookies(httpServletRequest);
+        jwtUtils.validateJwtToken(token);
+        String email = jwtUtils.getEmailFromJwtToken(token);
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty())
+            throw new EmailNotFoundException("The logged in user is not valid!");
+
         Optional<Event> eventOptional = eventRepository.findById(id);
         if (eventOptional.isEmpty())
             throw new EventNotFoundException("Event not found!");
-        eventRepository.delete(eventOptional.get());
+
+        User organiser = eventOptional.get().getOrganiser();
+        if (user.get().getId() == organiser.getId())
+            eventRepository.delete(eventOptional.get());
+        else
+            throw new UnauthorizedException("User is not authorized!");
         return new ResponseEntity<>("Successfully deleted", HttpStatus.OK);
     }
 

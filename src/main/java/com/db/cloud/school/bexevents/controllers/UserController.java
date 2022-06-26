@@ -1,5 +1,6 @@
 package com.db.cloud.school.bexevents.controllers;
 
+import com.db.cloud.school.bexevents.exceptions.EmailNotFoundException;
 import com.db.cloud.school.bexevents.models.LoginRequest;
 import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.models.UserInfoResponse;
@@ -26,6 +27,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -71,7 +73,14 @@ public class UserController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<User>> getAllUsers(HttpServletRequest httpServletRequest) {
+        String token = jwtUtils.getJwtFromCookies(httpServletRequest);
+        jwtUtils.validateJwtToken(token);
+        String email = jwtUtils.getEmailFromJwtToken(token);
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isEmpty())
+            throw new EmailNotFoundException("The logged in user is not valid!");
+
         List<User> users = new ArrayList<>();
         userRepository.findAll().forEach(users::add);
         return new ResponseEntity<>(users, HttpStatus.OK);
