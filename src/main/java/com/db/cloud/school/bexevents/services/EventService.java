@@ -140,16 +140,23 @@ public class EventService {
     }
 
     public boolean checkIfUserAttends(int id, HttpServletRequest httpServletRequest) {
-        String token = jwtUtils.getJwtFromCookies(httpServletRequest);
-        jwtUtils.validateJwtToken(token);
-        String email = jwtUtils.getEmailFromJwtToken(token);
-        Optional<User> user = userRepository.findByEmail(email);
+        User user = getUserFromCookie(httpServletRequest);
         Optional<Event> event = eventRepository.findById(id);
         for (User u : event.get().getAttendees()) {
-            if (user.get().getEmail().equals(u.getEmail())) {
+            if (user.getEmail().equals(u.getEmail())) {
                 return true;
             }
         }
         return false;
+    }
+
+    public User getUserFromCookie(HttpServletRequest httpServletRequest) {
+        String token = jwtUtils.getJwtFromCookies(httpServletRequest);
+        jwtUtils.validateJwtToken(token);
+        String email = jwtUtils.getEmailFromJwtToken(token);
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty())
+            throw new EmailNotFoundException("The logged in user is not valid!");
+        return userOptional.get();
     }
 }

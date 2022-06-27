@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -61,7 +62,7 @@ public class EventController {
     }
 
     @PostMapping("/events")
-    public ResponseEntity<Event> addEvent(@RequestBody NewEventRequest event) {
+    public ResponseEntity<Event> addEvent(@RequestBody NewEventRequest event, HttpServletRequest httpServletRequest) {
         eventService.checkMandatoryData(event);
         String duration = eventService.getDuration(event.getStartDateTime(), event.getEndDateTime());
         User organiser = userRepository.findByEmail(event.getOrganiserEmail()).get();
@@ -72,19 +73,13 @@ public class EventController {
 
     @DeleteMapping("/events/{id}")
     public ResponseEntity<String> deleteEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
-        String token = jwtUtils.getJwtFromCookies(httpServletRequest);
-        jwtUtils.validateJwtToken(token);
-        String email = jwtUtils.getEmailFromJwtToken(token);
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isEmpty())
-            throw new EmailNotFoundException("The logged in user is not valid!");
-
+        User user = eventService.getUserFromCookie(httpServletRequest);
         Optional<Event> eventOptional = eventRepository.findById(id);
         if (eventOptional.isEmpty())
             throw new EventNotFoundException("Event not found!");
 
         User organiser = eventOptional.get().getOrganiser();
-        if (user.get().getId() == organiser.getId())
+        if (Objects.equals(user.getId(), organiser.getId()))
             eventRepository.delete(eventOptional.get());
         else
             throw new UnauthorizedException("User is not authorized!");
