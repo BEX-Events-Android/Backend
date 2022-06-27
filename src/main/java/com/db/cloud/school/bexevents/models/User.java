@@ -1,5 +1,6 @@
 package com.db.cloud.school.bexevents.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,6 +34,7 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @JsonIgnore
     @ManyToMany
     @Cascade({org.hibernate.annotations.CascadeType.ALL})
     @JoinTable(

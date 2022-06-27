@@ -50,32 +50,28 @@ public class EventController {
     }
 
     @GetMapping("/events")
-    public ResponseEntity<List<EventResponse>> getAllEvents(HttpServletRequest httpServletRequest) {
+    public ResponseEntity<List<EventResponse>> getAllEvents(@RequestParam(required = false) String date,
+                                                            HttpServletRequest httpServletRequest) {
         List<Event> events = new ArrayList<>(eventRepository.findAll());
         List<EventResponse> eventResponses = new ArrayList<>();
         boolean isAttending;
-        for (Event event : events) {
+        if(date != null) {
+            for (Event event : events) {
+                String startDateTime = event.getStartDateTime();
+                String[] info = startDateTime.split(" ", 2);
+                if(date.equals(info[0])){
+                    isAttending = eventService.checkIfUserAttends(event.getId(), httpServletRequest);
+                    eventResponses.add(new EventResponse(event, isAttending));
+                }
+            }
+            return new ResponseEntity<>(eventResponses, HttpStatus.OK);
+        } else for (Event event : events) {
             isAttending = eventService.checkIfUserAttends(event.getId(), httpServletRequest);
             eventResponses.add(new EventResponse(event, isAttending));
         }
         return new ResponseEntity<>(eventResponses, HttpStatus.OK);
     }
-
-    // TODO could be integrated with get all events with optional query param
-    @GetMapping("/events/date/{startingDate}")
-    public ResponseEntity<List<EventResponse>> getAllEventsByDate(@PathVariable("startingDate") String sD) {
-        List<Event> events = new ArrayList<>(eventRepository.findAll());
-        List<EventResponse> eventResponses = new ArrayList<>();
-
-        for (Event event : events) {
-            String startDateTime = event.getStartDateTime();
-            String[] info = startDateTime.split(" ", 2);
-            if(sD.equals(info[0])){
-                eventResponses.add(new EventResponse(event));
-            }
-        }
-        return new ResponseEntity<>(eventResponses, HttpStatus.OK);
-    }
+    
     @PostMapping("/events")
     public ResponseEntity<Event> addEvent(@RequestBody NewEventRequest event, HttpServletRequest httpServletRequest) {
         User user = jwtUtils.getUserFromCookie(httpServletRequest);
