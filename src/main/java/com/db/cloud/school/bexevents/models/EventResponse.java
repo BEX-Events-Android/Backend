@@ -22,6 +22,20 @@ public class EventResponse {
     private List<UserInfoResponse> attendees;
     private boolean isAttendingEvent;
 
+    public EventResponse(Event event) {
+        id = event.getId();
+        name = event.getName();
+        startDateTime = event.getStartDateTime();
+        endDateTime = event.getEndDateTime();
+        duration = event.getDuration();
+        description = event.getDescription();
+        organiser = new UserInfoResponse(event.getOrganiser());
+        attendees = new ArrayList<>();
+        location = event.getLocation();
+        for (User attendee : event.getAttendees()) {
+            attendees.add(new UserInfoResponse(attendee));
+        }
+    }
     public EventResponse(Event event, boolean attends) {
         id = event.getId();
         name = event.getName();

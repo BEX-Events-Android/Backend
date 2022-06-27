@@ -63,6 +63,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(h2ConsolePath + "/**").permitAll()
                 .antMatchers("/users/**").permitAll()
                 .antMatchers("/events/**").permitAll()
+                .antMatchers("/health").permitAll()
                 .anyRequest().authenticated();
 
         // fix H2 database console: Refused to display ' in a frame because it set 'X-Frame-Options' to 'deny'

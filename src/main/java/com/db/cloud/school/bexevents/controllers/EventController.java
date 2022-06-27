@@ -61,6 +61,21 @@ public class EventController {
         return new ResponseEntity<>(eventResponses, HttpStatus.OK);
     }
 
+    // TODO could be integrated with get all events with optional query param
+    @GetMapping("/events/date/{startingDate}")
+    public ResponseEntity<List<EventResponse>> getAllEventsByDate(@PathVariable("startingDate") String sD) {
+        List<Event> events = new ArrayList<>(eventRepository.findAll());
+        List<EventResponse> eventResponses = new ArrayList<>();
+
+        for (Event event : events) {
+            String startDateTime = event.getStartDateTime();
+            String[] info = startDateTime.split(" ", 2);
+            if(sD.equals(info[0])){
+                eventResponses.add(new EventResponse(event));
+            }
+        }
+        return new ResponseEntity<>(eventResponses, HttpStatus.OK);
+    }
     @PostMapping("/events")
     public ResponseEntity<Event> addEvent(@RequestBody NewEventRequest event, HttpServletRequest httpServletRequest) {
         User user = jwtUtils.getUserFromCookie(httpServletRequest);
