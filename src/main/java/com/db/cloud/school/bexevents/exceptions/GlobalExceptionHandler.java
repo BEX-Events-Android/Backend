@@ -31,4 +31,16 @@ public class GlobalExceptionHandler {
     public @ResponseBody ErrorResponse handleNotLoggedInExcpetion(NotLoggedInExcpetion ex) {
         return new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
     }
+
+    @ExceptionHandler(value = UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public @ResponseBody ErrorResponse handleUnauthorizedException(UnauthorizedException ex) {
+        return new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(value = JWTException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public @ResponseBody ErrorResponse handleJWTException(JWTException ex) {
+        return new ErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+    }
 }

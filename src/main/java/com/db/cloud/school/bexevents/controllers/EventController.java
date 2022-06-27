@@ -63,10 +63,13 @@ public class EventController {
 
     @PostMapping("/events")
     public ResponseEntity<Event> addEvent(@RequestBody NewEventRequest event, HttpServletRequest httpServletRequest) {
+        User user = eventService.getUserFromCookie(httpServletRequest);
         eventService.checkMandatoryData(event);
         String duration = eventService.getDuration(event.getStartDateTime(), event.getEndDateTime());
-        User organiser = userRepository.findByEmail(event.getOrganiserEmail()).get();
-        Event savedEvent = new Event(event, organiser, duration);
+        Optional<User> organiser = userRepository.findByEmail(event.getOrganiserEmail());
+        if (organiser.isEmpty())
+            throw new EmailNotFoundException("Organiser's email not found!");
+        Event savedEvent = new Event(event, organiser.get(), duration);
         eventRepository.save(savedEvent);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -88,14 +91,13 @@ public class EventController {
 
     @PostMapping("/events/{id}/booking")
     public ResponseEntity<String> bookEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
-        String token = jwtUtils.getJwtFromCookies(httpServletRequest);
-        jwtUtils.validateJwtToken(token);
-        String email = jwtUtils.getEmailFromJwtToken(token);
-        Optional<User> user = userRepository.findByEmail(email);
+        User user = eventService.getUserFromCookie(httpServletRequest);
         Optional<Event> event = eventRepository.findById(id);
-        event.get().getAttendees().add(user.get());
-        user.get().getAttendsEvent().add(event.get());
-        userRepository.save(user.get());
+        if (event.isEmpty())
+            throw new EventNotFoundException("Event not found!");
+        event.get().getAttendees().add(user);
+        user.getAttendsEvent().add(event.get());
+        userRepository.save(user);
         eventRepository.save(event.get());
         return new ResponseEntity<String>("The booking was a success", HttpStatus.OK);
     }
