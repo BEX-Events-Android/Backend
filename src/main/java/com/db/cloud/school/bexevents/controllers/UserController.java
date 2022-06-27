@@ -8,6 +8,7 @@ import com.db.cloud.school.bexevents.payload.UserSignupRequest;
 import com.db.cloud.school.bexevents.repositories.UserRepository;
 import com.db.cloud.school.bexevents.security.jwt.JwtUtils;
 import com.db.cloud.school.bexevents.security.services.UserDetailsImpl;
+import com.db.cloud.school.bexevents.services.UserService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -45,6 +46,9 @@ public class UserController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    @Autowired
+    UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -92,6 +96,8 @@ public class UserController {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
             return ResponseEntity.badRequest().body("Error: Email is already in use!");
         }
+
+        userService.checkRegisterRequest(signUpRequest);
 
         // Create new user's account
         User user = new User(signUpRequest.getFirstName(),

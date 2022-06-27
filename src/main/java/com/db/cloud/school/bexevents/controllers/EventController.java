@@ -63,7 +63,7 @@ public class EventController {
 
     @PostMapping("/events")
     public ResponseEntity<Event> addEvent(@RequestBody NewEventRequest event, HttpServletRequest httpServletRequest) {
-        User user = eventService.getUserFromCookie(httpServletRequest);
+        User user = jwtUtils.getUserFromCookie(httpServletRequest);
         eventService.checkMandatoryData(event);
         String duration = eventService.getDuration(event.getStartDateTime(), event.getEndDateTime());
         Optional<User> organiser = userRepository.findByEmail(event.getOrganiserEmail());
@@ -76,7 +76,7 @@ public class EventController {
 
     @DeleteMapping("/events/{id}")
     public ResponseEntity<String> deleteEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
-        User user = eventService.getUserFromCookie(httpServletRequest);
+        User user = jwtUtils.getUserFromCookie(httpServletRequest);
         Optional<Event> eventOptional = eventRepository.findById(id);
         if (eventOptional.isEmpty())
             throw new EventNotFoundException("Event not found!");
@@ -91,7 +91,7 @@ public class EventController {
 
     @PostMapping("/events/{id}/booking")
     public ResponseEntity<String> bookEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
-        User user = eventService.getUserFromCookie(httpServletRequest);
+        User user = jwtUtils.getUserFromCookie(httpServletRequest);
         Optional<Event> event = eventRepository.findById(id);
         if (event.isEmpty())
             throw new EventNotFoundException("Event not found!");
