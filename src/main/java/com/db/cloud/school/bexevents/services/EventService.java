@@ -8,10 +8,18 @@ import com.db.cloud.school.bexevents.models.User;
 import com.db.cloud.school.bexevents.repositories.EventRepository;
 import com.db.cloud.school.bexevents.repositories.UserRepository;
 import com.db.cloud.school.bexevents.security.jwt.JwtUtils;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -148,6 +156,29 @@ public class EventService {
             }
         }
         return false;
+    }
+
+    public void sendEmail(String toEmail, String eventName) {
+        Email from = new Email("gb.stanescu01@gmail.com");
+        String subject = "BEX Events";
+        Email to = new Email(toEmail);
+        Content content = new Content("text/plain", "You have successfully booked a sit at " + eventName + " event!");
+        Mail mail = new Mail(from, subject, to, content);
+
+        SendGrid sg = new SendGrid(System.getenv("SENDGRID_API_KEY"));
+        Request request = new Request();
+
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            System.out.println(response.getStatusCode());
+            System.out.println(response.getBody());
+            System.out.println(response.getHeaders());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

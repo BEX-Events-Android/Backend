@@ -110,6 +110,9 @@ public class EventController {
         user.getAttendsEvent().add(event.get());
         userRepository.save(user);
         eventRepository.save(event.get());
+
+        eventService.sendEmail(user.getEmail(), event.get().getName());
+
         return new ResponseEntity<String>("The booking was a success", HttpStatus.OK);
     }
 }
