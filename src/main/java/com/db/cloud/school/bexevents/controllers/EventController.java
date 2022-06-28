@@ -3,10 +3,7 @@ package com.db.cloud.school.bexevents.controllers;
 import com.db.cloud.school.bexevents.exceptions.EmailNotFoundException;
 import com.db.cloud.school.bexevents.exceptions.EventNotFoundException;
 import com.db.cloud.school.bexevents.exceptions.UnauthorizedException;
-import com.db.cloud.school.bexevents.models.Event;
-import com.db.cloud.school.bexevents.models.EventResponse;
-import com.db.cloud.school.bexevents.models.NewEventRequest;
-import com.db.cloud.school.bexevents.models.User;
+import com.db.cloud.school.bexevents.models.*;
 import com.db.cloud.school.bexevents.repositories.EventRepository;
 import com.db.cloud.school.bexevents.repositories.UserRepository;
 import com.db.cloud.school.bexevents.security.jwt.JwtUtils;
@@ -17,10 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class EventController {
@@ -51,11 +45,30 @@ public class EventController {
 
     @GetMapping("/events")
     public ResponseEntity<List<EventResponse>> getAllEvents(@RequestParam(required = false) String date,
+                                                            @RequestParam(required = false) List<String> location,
                                                             HttpServletRequest httpServletRequest) {
         List<Event> events = new ArrayList<>(eventRepository.findAll());
         List<EventResponse> eventResponses = new ArrayList<>();
         boolean isAttending;
-        if(date != null) {
+        if (date == null && location == null) {
+            for (Event event : events) {
+                isAttending = eventService.checkIfUserAttends(event.getId(), httpServletRequest);
+                eventResponses.add(new EventResponse(event, isAttending));
+            }
+            return new ResponseEntity<>(eventResponses, HttpStatus.OK);
+        }
+        else if (date != null && location != null) {
+            for (Event event : events) {
+                String startDateTime = event.getStartDateTime();
+                String[] info = startDateTime.split(" ", 2);
+                if(date.equals(info[0]) && location.contains(event.getLocation())){
+                    isAttending = eventService.checkIfUserAttends(event.getId(), httpServletRequest);
+                    eventResponses.add(new EventResponse(event, isAttending));
+                }
+            }
+            return new ResponseEntity<>(eventResponses, HttpStatus.OK);
+        }
+       else if(date != null) {
             for (Event event : events) {
                 String startDateTime = event.getStartDateTime();
                 String[] info = startDateTime.split(" ", 2);
@@ -65,11 +78,15 @@ public class EventController {
                 }
             }
             return new ResponseEntity<>(eventResponses, HttpStatus.OK);
-        } else for (Event event : events) {
-            isAttending = eventService.checkIfUserAttends(event.getId(), httpServletRequest);
-            eventResponses.add(new EventResponse(event, isAttending));
+        } else {
+            for (Event event : events) {
+                if (location.contains(event.getLocation())) {
+                    isAttending = eventService.checkIfUserAttends(event.getId(), httpServletRequest);
+                    eventResponses.add(new EventResponse(event, isAttending));
+                }
+            }
+            return new ResponseEntity<>(eventResponses, HttpStatus.OK);
         }
-        return new ResponseEntity<>(eventResponses, HttpStatus.OK);
     }
     
     @PostMapping("/events")
@@ -114,5 +131,12 @@ public class EventController {
         eventService.sendEmail(user.getEmail(), event.get().getName());
 
         return new ResponseEntity<String>("The booking was a success", HttpStatus.OK);
+    }
+
+
+    @GetMapping("/events/locations")
+    public ResponseEntity<Set<String>> getLocations (HttpServletRequest httpServletRequest) {
+        Set<String> eventLocations = eventService.getLocations();
+        return new ResponseEntity<>(eventLocations, HttpStatus.OK);
     }
 }

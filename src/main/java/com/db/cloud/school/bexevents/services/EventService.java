@@ -181,4 +181,13 @@ public class EventService {
         }
     }
 
+    public Set<String> getLocations() {
+        List<Event> events = new ArrayList<>(eventRepository.findAll());
+        Set<String> eventLocations = new LinkedHashSet<>();
+        for (Event event : events) {
+            eventLocations.add(event.getLocation());
+        }
+        return eventLocations;
+    }
+
 }
