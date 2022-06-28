@@ -26,5 +26,14 @@ public class UserService {
 
         if (!signUpRequest.getPassword().equals(signUpRequest.getMatchingPassword()))
             throw new InvalidSignUpException("Passwords do not match!");
+
+        if(signUpRequest.getEmail().contains(" "))
+            throw new InvalidSignUpException("Email contains whitespaces!");
+
+        String regex = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
+                + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+
+        if(!signUpRequest.getEmail().matches(regex))
+            throw new InvalidSignUpException("Invalid email address format!");
     }
 }
