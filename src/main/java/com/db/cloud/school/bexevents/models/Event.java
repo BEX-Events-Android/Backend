@@ -57,6 +57,11 @@ public class Event {
     @Column(name = "assets")
     private List<Asset> assets;
 
+    /*
+    @OneToMany
+    @Column(name = "comments")
+    private List<Comment> comments;
+    */
     public Event(NewEventRequest newEventRequest, User organiser, String duration) {
         name = newEventRequest.getName();
         startDateTime = newEventRequest.getStartDateTime();
