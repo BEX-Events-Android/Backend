@@ -2,10 +2,19 @@ package com.db.cloud.school.bexevents.services;
 
 import com.db.cloud.school.bexevents.exceptions.InvalidSignUpException;
 import com.db.cloud.school.bexevents.payload.UserSignupRequest;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.util.UUID;
 
 @Service
 public class UserService {
+    @Autowired
+    EmailService emailService;
 
     public void checkRegisterRequest(UserSignupRequest signUpRequest) {
         if (signUpRequest.getEmail() == null ||
@@ -35,5 +44,15 @@ public class UserService {
 
         if(!signUpRequest.getEmail().matches(regex))
             throw new InvalidSignUpException("Invalid email address format!");
+    }
+
+    public void sendConfirmationMail(String toEmail, UUID code) {
+        Email from = new Email("gb.stanescu01@gmail.com");
+        String subject = "BEX Events - Account Confirmation";
+        Email to = new Email(toEmail);
+        Content content = new Content("text/plain", "http://localhost:8080/users/confirmation?code=" + code);
+        Mail mail = new Mail(from, subject, to, content);
+
+        emailService.sendEmail(mail);
     }
 }

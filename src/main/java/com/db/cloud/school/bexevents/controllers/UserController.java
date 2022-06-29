@@ -1,8 +1,10 @@
 package com.db.cloud.school.bexevents.controllers;
 
 import com.db.cloud.school.bexevents.exceptions.EmailNotFoundException;
+import com.db.cloud.school.bexevents.exceptions.InvalidSignUpException;
 import com.db.cloud.school.bexevents.models.LoginRequest;
 import com.db.cloud.school.bexevents.models.User;
+import com.db.cloud.school.bexevents.models.UserConfirmation;
 import com.db.cloud.school.bexevents.models.UserInfoResponse;
 import com.db.cloud.school.bexevents.payload.UserSignupRequest;
 import com.db.cloud.school.bexevents.repositories.UserRepository;
@@ -21,14 +23,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -49,6 +49,8 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+    ArrayList<UserConfirmation> awaitingUsers = new ArrayList<>();
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -105,9 +107,28 @@ public class UserController {
                 signUpRequest.getEmail(),
                 encoder.encode(signUpRequest.getPassword()));
 
-        userRepository.save(user);
+        // userRepository.save(user);
+
+        UserConfirmation userConfirmation = new UserConfirmation(user);
+        awaitingUsers.add(userConfirmation);
+        userService.sendConfirmationMail(user.getEmail(), userConfirmation.getCode());
 
         return ResponseEntity.ok("User registered successfully!");
+    }
+
+    @GetMapping("/confirmation")
+    public ResponseEntity<?> confirmUser(@RequestParam(name = "code") UUID code) {
+        int i;
+        for (i = 0; i < awaitingUsers.size(); i++) {
+            if (awaitingUsers.get(i).getCode().equals(code)) {
+                userRepository.save(awaitingUsers.get(i).getUser());
+                awaitingUsers.remove(i);
+                break;
+            }
+        }
+        if (i == awaitingUsers.size())
+            throw new InvalidSignUpException("Invalid UUID!");
+        return ResponseEntity.ok("User confirmation successful.");
     }
 
     @GetMapping("/test")
