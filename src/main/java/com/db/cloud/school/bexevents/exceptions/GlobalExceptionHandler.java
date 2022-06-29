@@ -49,4 +49,10 @@ public class GlobalExceptionHandler {
     public @ResponseBody ErrorResponse handleSignUpException(InvalidSignUpException ex) {
         return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
+
+    @ExceptionHandler(value = InvalidSignUpException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public @ResponseBody ErrorResponse handleInvalidCommentException(InvalidCommentException ex) {
+        return new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
 }
