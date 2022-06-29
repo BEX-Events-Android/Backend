@@ -6,18 +6,22 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 @Entity
-@Table(name = "comments")
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
 @Getter
+@Table(name = "comments")
 public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    private int id;
 
     @Column(name = "user")
     private String email;
@@ -28,14 +32,13 @@ public class Comment {
     @Column(name = "textBox")
     private String textBox;
 
-    @ManyToOne
-    @Column(name = "event")
-    private Event event;
 
-    public Comment(User user, String textBox, Event event) {
+    public Comment(User user, String textBox) {
         this.email = user.getEmail();
-        // TODO generate date posted when comment is created
         this.textBox = textBox;
-        this.event = event;
+        Date date = Calendar.getInstance().getTime();
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss");
+        String strDate = dateFormat.format(date);
+        this.datePosted = strDate;
     }
 }

@@ -123,6 +123,12 @@ public class EventController {
         Optional<Event> event = eventRepository.findById(id);
         if (event.isEmpty())
             throw new EventNotFoundException("Event not found!");
+        if (event.get().getAttendees().contains(user) && user.getAttendsEvent().contains(event.get())) {
+            return new ResponseEntity<String>("You have already booked a seat for this event", HttpStatus.NOT_ACCEPTABLE);
+        }
+        if (user.getEmail().equals(event.get().getOrganiser().getEmail())) {
+            return new ResponseEntity<String>("You can't book a seat to this event, because you are the organiser", HttpStatus.NOT_ACCEPTABLE);
+        }
         event.get().getAttendees().add(user);
         user.getAttendsEvent().add(event.get());
         userRepository.save(user);
@@ -136,7 +142,20 @@ public class EventController {
 
     @GetMapping("/events/locations")
     public ResponseEntity<Set<String>> getLocations (HttpServletRequest httpServletRequest) {
+        User user = jwtUtils.getUserFromCookie(httpServletRequest);
         Set<String> eventLocations = eventService.getLocations();
         return new ResponseEntity<>(eventLocations, HttpStatus.OK);
+    }
+
+    @PostMapping("/events/{id}/comments")
+    public ResponseEntity<String> addCommentToEvent(@PathVariable("id") int id,
+                                                    HttpServletRequest httpServletRequest,
+                                                    @RequestBody String comment) {
+        User user = jwtUtils.getUserFromCookie(httpServletRequest);
+        Optional<Event> event = eventRepository.findById(id);
+        eventService.checkMandatoryDataForComment(comment);
+        event.get().getComments().add(new Comment(user, comment));
+        eventRepository.save(event.get());
+        return new ResponseEntity<>("Your comment was successfully posted to" + " " + event.get().getName() + " event", HttpStatus.OK);
     }
 }

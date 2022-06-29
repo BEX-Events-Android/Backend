@@ -1,5 +1,6 @@
 package com.db.cloud.school.bexevents.services;
 
+import com.db.cloud.school.bexevents.exceptions.InvalidCommentException;
 import com.db.cloud.school.bexevents.models.Event;
 import com.db.cloud.school.bexevents.models.NewEventRequest;
 import com.db.cloud.school.bexevents.exceptions.EmailNotFoundException;
@@ -145,6 +146,13 @@ public class EventService {
         checkEmail(event.getOrganiserEmail());
         checkDateFormat(event.getStartDateTime());
         checkDateFormat(event.getEndDateTime());
+    }
+
+    public void checkMandatoryDataForComment(String comment) {
+        if (comment == null)
+            throw new InvalidCommentException("You're comment is empty");
+        if (comment.length() > 250)
+            throw new InvalidCommentException("Your comment exceeds the maximum limit of 250 characters");
     }
 
     public boolean checkIfUserAttends(int id, HttpServletRequest httpServletRequest) {

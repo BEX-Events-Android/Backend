@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class EventResponse {
     private UserInfoResponse organiser;
     private List<UserInfoResponse> attendees;
     private boolean isAttendingEvent;
+    private List<Comment> comments;
 
     public EventResponse(Event event) {
         id = event.getId();
@@ -50,5 +52,6 @@ public class EventResponse {
             attendees.add(new UserInfoResponse(attendee));
         }
         isAttendingEvent = attends; // TODO implement logic by jwt
+        comments = event.getComments();
     }
 }
