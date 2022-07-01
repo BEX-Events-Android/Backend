@@ -2,10 +2,7 @@ package com.db.cloud.school.bexevents.controllers;
 
 import com.db.cloud.school.bexevents.exceptions.EmailNotFoundException;
 import com.db.cloud.school.bexevents.exceptions.InvalidSignUpException;
-import com.db.cloud.school.bexevents.models.LoginRequest;
-import com.db.cloud.school.bexevents.models.User;
-import com.db.cloud.school.bexevents.models.UserConfirmation;
-import com.db.cloud.school.bexevents.models.UserInfoResponse;
+import com.db.cloud.school.bexevents.models.*;
 import com.db.cloud.school.bexevents.payload.UserSignupRequest;
 import com.db.cloud.school.bexevents.repositories.UserRepository;
 import com.db.cloud.school.bexevents.security.jwt.JwtUtils;
@@ -110,7 +107,7 @@ public class UserController {
         // userRepository.save(user);
 
         UserConfirmation userConfirmation = new UserConfirmation(user);
-        awaitingUsers.add(userConfirmation);
+        //awaitingUsers.add(userConfirmation);
         userService.sendConfirmationMail(user.getEmail(), userConfirmation.getCode());
 
         return ResponseEntity.ok("User registered successfully!");
@@ -129,6 +126,14 @@ public class UserController {
         if (i == awaitingUsers.size())
             throw new InvalidSignUpException("Invalid UUID!");
         return ResponseEntity.ok("User confirmation successful.");
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<Profile> getUserProfile(HttpServletRequest httpServletRequest) {
+        User user = jwtUtils.getUserFromCookie(httpServletRequest);
+        Profile profile = new Profile(user);
+        profile.setPastEventsAndUpcomingEvents(user);
+        return new ResponseEntity<Profile>(profile, HttpStatus.OK);
     }
 
     @GetMapping("/test")
