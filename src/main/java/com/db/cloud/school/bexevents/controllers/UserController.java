@@ -107,7 +107,7 @@ public class UserController {
         // userRepository.save(user);
 
         UserConfirmation userConfirmation = new UserConfirmation(user);
-        //awaitingUsers.add(userConfirmation);
+        awaitingUsers.add(userConfirmation);
         userService.sendConfirmationMail(user.getEmail(), userConfirmation.getCode());
 
         return ResponseEntity.ok("User registered successfully!");
@@ -119,11 +119,12 @@ public class UserController {
         for (i = 0; i < awaitingUsers.size(); i++) {
             if (awaitingUsers.get(i).getCode().equals(code)) {
                 userRepository.save(awaitingUsers.get(i).getUser());
+                System.out.println("here");
                 awaitingUsers.remove(i);
                 break;
             }
         }
-        if (i == awaitingUsers.size())
+        if (i == awaitingUsers.size() + 1)
             throw new InvalidSignUpException("Invalid UUID!");
         return ResponseEntity.ok("User confirmation successful.");
     }
