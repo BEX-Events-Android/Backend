@@ -17,8 +17,8 @@ public class Profile {
     private String firstName;
     private String lastName;
     private String email;
-    private List<Event> pastEvents = new ArrayList<>();
-    private List<Event> upcomingEvents = new ArrayList<>();
+    private List<EventResponse> pastEvents = new ArrayList<>();
+    private List<EventResponse> upcomingEvents = new ArrayList<>();
 
     public Profile(User user) {
         this.firstName = user.getFirstName();
@@ -33,15 +33,15 @@ public class Profile {
             List<String> list = Arrays.stream(event.getStartDateTime().split("[ ,-]"))
                     .collect(Collectors.toCollection(ArrayList<String>::new));
             if (Integer.parseInt(list.get(2)) < (currentDate.getYear() - 2000)) {
-                this.pastEvents.add(event);
+                this.pastEvents.add(new EventResponse(event, true));
             } else if (Integer.parseInt(list.get(1)) < (currentDate.getMonthValue())
                     && Integer.parseInt(list.get(2)) == (currentDate.getYear() - 2000)) {
-                this.pastEvents.add(event);
+                this.pastEvents.add(new EventResponse(event, true));
             } else if (Integer.parseInt(list.get(0)) <= (currentDate.getDayOfMonth())
                     && Integer.parseInt(list.get(1)) == currentDate.getMonthValue()
                     && Integer.parseInt(list.get(2)) == (currentDate.getYear() - 2000)) {
-                this.pastEvents.add(event);
-            } else this.upcomingEvents.add(event);
+                this.pastEvents.add(new EventResponse(event, true));
+            } else this.upcomingEvents.add(new EventResponse(event, true));
         }
     }
 }
