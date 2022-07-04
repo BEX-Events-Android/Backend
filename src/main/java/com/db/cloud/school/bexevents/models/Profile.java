@@ -17,8 +17,8 @@ public class Profile {
     private String firstName;
     private String lastName;
     private String email;
-    private List<NewEventRequest> pastEvents = new ArrayList<>();
-    private List<NewEventRequest> upcomingEvents = new ArrayList<>();
+    private List<Event> pastEvents = new ArrayList<>();
+    private List<Event> upcomingEvents = new ArrayList<>();
 
     public Profile(User user) {
         this.firstName = user.getFirstName();
@@ -29,11 +29,9 @@ public class Profile {
     public void setPastEventsAndUpcomingEvents(User user) {
         LocalDate currentDate = LocalDate.now();
 
-        for (Event currentEvent : user.getAttendsEvent()) {
-            List<String> list = Arrays.stream(currentEvent.getStartDateTime().split("[ ,-]"))
+        for (Event event : user.getAttendsEvent()) {
+            List<String> list = Arrays.stream(event.getStartDateTime().split("[ ,-]"))
                     .collect(Collectors.toCollection(ArrayList<String>::new));
-            NewEventRequest event = new NewEventRequest(currentEvent.getName(), currentEvent.getStartDateTime(), currentEvent.getEndDateTime(),
-                    currentEvent.getLocation(), currentEvent.getDescription(), currentEvent.getAssets(), currentEvent.getOrganiser().getEmail());
             if (Integer.parseInt(list.get(2)) < (currentDate.getYear() - 2000)) {
                 this.pastEvents.add(event);
             } else if (Integer.parseInt(list.get(1)) < (currentDate.getMonthValue())
