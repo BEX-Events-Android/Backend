@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
-public class EventService {
+public class EventService implements IEventService {
 
     @Autowired
     EventRepository eventRepository;
@@ -158,9 +158,9 @@ public class EventService {
             throw new InvalidCommentException("Your comment exceeds the maximum limit of 250 characters");
     }
 
-    public boolean checkIfUserAttends(int id, HttpServletRequest httpServletRequest) {
+    public boolean checkIfUserAttends(int eventId, HttpServletRequest httpServletRequest) {
         User user = jwtUtils.getUserFromCookie(httpServletRequest);
-        Optional<Event> event = eventRepository.findById(id);
+        Optional<Event> event = eventRepository.findById(eventId);
         for (User u : event.get().getAttendees()) {
             if (user.getEmail().equals(u.getEmail())) {
                 return true;
@@ -169,7 +169,7 @@ public class EventService {
         return false;
     }
 
-    public void sendEmail(String toEmail, String eventName) {
+    public void sendConfirmationBookingEmail(String toEmail, String eventName) {
         Email from = new Email("gb.stanescu01@gmail.com");
         String subject = "BEX Events";
         Email to = new Email(toEmail);
@@ -187,5 +187,4 @@ public class EventService {
         }
         return eventLocations;
     }
-
 }

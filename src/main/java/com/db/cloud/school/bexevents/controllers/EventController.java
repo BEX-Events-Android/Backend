@@ -8,7 +8,6 @@ import com.db.cloud.school.bexevents.repositories.EventRepository;
 import com.db.cloud.school.bexevents.repositories.UserRepository;
 import com.db.cloud.school.bexevents.security.jwt.JwtUtils;
 import com.db.cloud.school.bexevents.services.EventService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,23 +16,23 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 @RestController
+@RequestMapping("/events")
 public class EventController {
 
-    @Autowired
-    EventRepository eventRepository;
+    private EventRepository eventRepository;
+    private UserRepository userRepository;
+    private EventService eventService;
+    private JwtUtils jwtUtils;
 
-    @Autowired
-    UserRepository userRepository;
+    public EventController(EventRepository eventRepository, UserRepository userRepository, EventService eventService, JwtUtils jwtUtils) {
+        this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
+        this.eventService = eventService;
+        this.jwtUtils = jwtUtils;
+    }
 
-    @Autowired
-    EventService eventService;
-
-    @Autowired
-    JwtUtils jwtUtils;
-
-
-    @GetMapping("/events/{id}")
-    public ResponseEntity<EventResponse> getEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
+    @GetMapping("/{id}")
+    public ResponseEntity<EventResponse> getEventById(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
         Optional<Event> eventOptional = eventRepository.findById(id);
         if (eventOptional.isEmpty())
             throw new EventNotFoundException("Event not found!");
@@ -43,19 +42,26 @@ public class EventController {
         return new ResponseEntity<>(eventResponse, HttpStatus.OK);
     }
 
-    @GetMapping("/events")
-    public ResponseEntity<List<EventResponse>> getAllEvents(@RequestParam(required = false) String date,
-                                                            @RequestParam(required = false) List<String> location,
-                                                            HttpServletRequest httpServletRequest) {
+    private ResponseEntity<List<EventResponse>> findNoFilter(List<Event> events,
+                                                             List<EventResponse> eventResponses,
+                                                             HttpServletRequest httpServletRequest) {
+        boolean isAttending;
+        for (Event event : events) {
+            isAttending = eventService.checkIfUserAttends(event.getId(), httpServletRequest);
+            eventResponses.add(new EventResponse(event, isAttending));
+        }
+        return new ResponseEntity<>(eventResponses, HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<EventResponse>> getAllFilteredEvents(@RequestParam(required = false) String date,
+                                                                @RequestParam(required = false) List<String> location,
+                                                                HttpServletRequest httpServletRequest) {
         List<Event> events = new ArrayList<>(eventRepository.findAll());
         List<EventResponse> eventResponses = new ArrayList<>();
         boolean isAttending;
         if (date == null && location == null) {
-            for (Event event : events) {
-                isAttending = eventService.checkIfUserAttends(event.getId(), httpServletRequest);
-                eventResponses.add(new EventResponse(event, isAttending));
-            }
-            return new ResponseEntity<>(eventResponses, HttpStatus.OK);
+            findNoFilter(events, eventResponses, httpServletRequest);
         }
         else if (date != null && location != null) {
             for (Event event : events) {
@@ -87,9 +93,10 @@ public class EventController {
             }
             return new ResponseEntity<>(eventResponses, HttpStatus.OK);
         }
+       return null; // TODO refactor
     }
     
-    @PostMapping("/events")
+    @PostMapping
     public ResponseEntity<Event> addEvent(@RequestBody NewEventRequest event, HttpServletRequest httpServletRequest) {
         User user = jwtUtils.getUserFromCookie(httpServletRequest);
         eventService.checkMandatoryData(event);
@@ -102,25 +109,27 @@ public class EventController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/events/{id}")
-    public ResponseEntity<String> deleteEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
-        User user = jwtUtils.getUserFromCookie(httpServletRequest);
-        Optional<Event> eventOptional = eventRepository.findById(id);
-        if (eventOptional.isEmpty())
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteEvent(@PathVariable("id") int eventId, HttpServletRequest httpServletRequest) {
+        int userId = jwtUtils.getUserFromCookie(httpServletRequest).getId();
+        Optional<Event> event = eventRepository.findById(eventId);
+        if (event.isEmpty()) {
             throw new EventNotFoundException("Event not found!");
+        }
 
-        User organiser = eventOptional.get().getOrganiser();
-        if (Objects.equals(user.getId(), organiser.getId()))
-            eventRepository.delete(eventOptional.get());
-        else
+        int organiserId = event.get().getOrganiser().getId();
+        if (userId != organiserId) {
             throw new UnauthorizedException("User is not authorized!");
+        }
+
+        eventRepository.delete(event.get());
         return new ResponseEntity<>("Successfully deleted", HttpStatus.OK);
     }
 
-    @PostMapping("/events/{id}/booking")
-    public ResponseEntity<String> bookEvent(@PathVariable("id") int id, HttpServletRequest httpServletRequest) {
+    @PostMapping("/{id}/booking")
+    public ResponseEntity<String> bookEvent(@PathVariable("id") int eventId, HttpServletRequest httpServletRequest) {
         User user = jwtUtils.getUserFromCookie(httpServletRequest);
-        Optional<Event> event = eventRepository.findById(id);
+        Optional<Event> event = eventRepository.findById(eventId);
         if (event.isEmpty())
             throw new EventNotFoundException("Event not found!");
         if (event.get().getAttendees().contains(user) && user.getAttendsEvent().contains(event.get())) {
@@ -134,20 +143,20 @@ public class EventController {
         userRepository.save(user);
         eventRepository.save(event.get());
 
-        eventService.sendEmail(user.getEmail(), event.get().getName());
+        eventService.sendConfirmationBookingEmail(user.getEmail(), event.get().getName());
 
         return new ResponseEntity<String>("The booking was a success", HttpStatus.OK);
     }
 
 
-    @GetMapping("/events/locations")
+    @GetMapping("/locations")
     public ResponseEntity<Set<String>> getLocations (HttpServletRequest httpServletRequest) {
         User user = jwtUtils.getUserFromCookie(httpServletRequest);
         Set<String> eventLocations = eventService.getLocations();
         return new ResponseEntity<>(eventLocations, HttpStatus.OK);
     }
 
-    @PostMapping("/events/{id}/comments")
+    @PostMapping("/{id}/comments")
     public ResponseEntity<String> addCommentToEvent(@PathVariable("id") int id,
                                                     HttpServletRequest httpServletRequest,
                                                     @RequestBody String comment) {
